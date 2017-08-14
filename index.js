@@ -1,28 +1,23 @@
 
-'use strict'
 
-const body = require('body-parser')
-const co = require('co')
-const express = require('express')
-const next = require('next')
+const body = require('body-parser');
+const co = require('co');
+const express = require('express');
+const next = require('next');
 
-const dev = process.env.NODE_ENV !== 'production'
-const app = next({ dev })
-const handle = app.getRequestHandler()
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
 
-const PORT = 3000
+const PORT = 3000;
 
 
-co(function * () {
+co(function* () {
+  yield app.prepare();
 
-  yield app.prepare()
-
-  const server = express()
-  server.use(body.json())
-  server.get('*', (req, res) => {
-    return handle(req, res)
-  })
-  server.listen(PORT)
-  console.log(`Listening on ${PORT}`)
-
+  const server = express();
+  server.use(body.json());
+  server.get('*', (req, res) => handle(req, res));
+  server.listen(PORT);
+  console.log(`Listening on ${PORT}`);
 });
