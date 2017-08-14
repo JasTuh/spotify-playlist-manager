@@ -13,7 +13,7 @@ const PORT = 3000;
 
 
 co(function* () {
-    yield app.prepare();
+  yield app.prepare();
 
   const server = express();
   server.use(body.json());
