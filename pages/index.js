@@ -1,3 +1,13 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-export default () => <div>Hello world!</div>;
+export default class Index extends Component {
+  render() {
+    return (
+      <div>
+        hello world!
+        <br />
+        <a href="/login"> Login! </a>
+      </div>
+    ); 
+  }
+}
