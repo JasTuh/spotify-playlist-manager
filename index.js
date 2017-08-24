@@ -2,6 +2,7 @@ const body = require('body-parser');
 const co = require('co');
 const express = require('express');
 const next = require('next');
+const mysql = require('mysql');
 const querystring = require('querystring');
 const keys = require('./keys.json');
 const request = require('request');
@@ -12,7 +13,26 @@ const handle = app.getRequestHandler();
 
 const PORT = 3000;
 
+const con = mysql.createConnection({
+  host: 'sql9.freemysqlhosting.net',
+  user: 'sql9191528',
+  password: 'DBrXQSTtNh',
+  database: 'sql9191528',
+});
 
+function createTables() {
+  const createUserTable = 'CREATE TABLE IF NOT EXISTS Users (\
+      `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\
+      AccessToken VARCHAR(100) NOT NULL,\
+      RefreshToken VARCHAR(100) NOT NULL);';
+  con.query(createUserTable);
+  const createPlaylistsTable = 'CREATE TABLE IF NOT EXISTS Playlists (\
+      `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\
+      userID int NOT NULL,\
+      playlists VARCHAR(600));';
+  con.query(createPlaylistsTable);
+}
+createTables();
 function login(req, res) {
   const scope = 'playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private';
   res.redirect(`https://accounts.spotify.com/authorize?${querystring.stringify(
