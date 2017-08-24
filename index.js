@@ -91,9 +91,12 @@ function handleLogin(req, res) {
     res.redirect(`/userLoggedIn?${querystring.stringify({ accessToken, refreshToken })}`);
   });
 }
+function handleLogout(req, res) {
+  res.clearCookie('user');
+  res.redirect('/');
+}
 
 function checkForCookies(req, res) {
-  res.clearCookie('user');
   const user = req.cookies.user;
   if (user) {
     res.redirect(`/userLoggedIn?${querystring.stringify({ accessToken: user })}`);
@@ -108,6 +111,7 @@ co(function* () {
   server.use(body.json());
   server.get('/login', login);
   server.get('/handleLogin', handleLogin);
+  server.get('/logout', handleLogout);
   server.get('/', checkForCookies);
   server.get('*', (req, res) => handle(req, res));
   server.listen(PORT);

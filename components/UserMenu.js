@@ -24,9 +24,7 @@ export default class UserMenu extends Component {
     }
     return (
       <div>
-        {this.state.playlists.items.map(playlist =>
-          <p> {playlist.name} </p>,
-        )}
+        logged in
       </div>
     );
   }
