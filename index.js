@@ -24,6 +24,7 @@ const con = mysql.createConnection({
 function createTables() {
   const createUserTable = 'CREATE TABLE IF NOT EXISTS Users (\
       `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,\
+      SpotifyID int,\
       AccessToken VARCHAR(100) NOT NULL,\
       RefreshToken VARCHAR(100) NOT NULL);';
   con.query(createUserTable);
@@ -45,6 +46,29 @@ function login(req, res) {
     })}`);
 }
 
+function checkForUser(userID, accessToken, refreshToken) {
+  const userQuery = `SELECT * FROM Users WHERE spotifyID = ${userID}`;
+  con.query(userQuery, (err, rows) => {
+    if (!rows || rows.length === 0) {
+      const userInsertQuery = `INSERT INTO Users VALUES (NULL, ${userID}, '${accessToken}', '${refreshToken}')`;
+      con.query(userInsertQuery);
+      console.log('inserted!');
+    }
+  });
+}
+function insertUserIntoDB(accessToken, refreshToken) {
+  const options = {
+    url: 'https://api.spotify.com/v1/me',
+    headers: { Authorization: 'Bearer ' + accessToken },
+    json: true,
+  };
+  // use the access token to access the Spotify Web API
+  request.get(options, function(error, response, body) {
+    const userID = parseInt(body.id, 10);
+    checkForUser(userID, accessToken, refreshToken);
+    console.log(userID);
+  });
+}
 function handleLogin(req, res) {
   const code = req.query.code;
   const authOptions = {
@@ -62,13 +86,14 @@ function handleLogin(req, res) {
   request.post(authOptions, (error, response, data) => {
     const accessToken = data.access_token;
     const refreshToken = data.refresh_token;
+    insertUserIntoDB(accessToken, refreshToken);
     res.cookie('user', accessToken);
     res.redirect(`/userLoggedIn?${querystring.stringify({ accessToken, refreshToken })}`);
   });
 }
 
 function checkForCookies(req, res) {
-  console.log(req.cookies);
+  res.clearCookie('user');
   const user = req.cookies.user;
   if (user) {
     res.redirect(`/userLoggedIn?${querystring.stringify({ accessToken: user })}`);
