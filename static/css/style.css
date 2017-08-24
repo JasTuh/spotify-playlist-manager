@@ -1,3 +1,12 @@
-body {
-  font: 11px menlo;
+/*
+ * General Styling Section
+ */
+
+
+/*
+ * Welcome Page Styling Section
+ */
+.loginButton {
+  display:block;
+  margin: 0 auto;
 }

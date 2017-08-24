@@ -7,26 +7,24 @@ export default class UserMenu extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      playlists: [],
+      playlists: {},
     };
   }
   componentDidMount() {
     getPlaylists(this.props.url.query.accessToken).then((res) => {
+      console.log(res);
       this.setState({
         playlists: res,
       });
     });
-    getTracksOfPlaylist("https://api.spotify.com/v1/users/1212905325/playlists/45n9rUFRfk6w9q1w96z7Fh/tracks", this.props.url.query.accessToken).then(text => {
-      console.log(text);
-    });
   }
   render() {
-    if (!this.state.playlists) {
+    if (!this.state.playlists.items) {
       return (<div />);
     }
     return (
       <div>
-        {this.state.playlists.map(playlist =>
+        {this.state.playlists.items.map(playlist =>
           <p> {playlist.name} </p>,
         )}
       </div>
