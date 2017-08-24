@@ -1,12 +1,33 @@
 import 'isomorphic-fetch';
 
-export default function getPlaylists(accessToken, offset) {
-  var urlOffset = offset;
-  if (!urlOffset){
-    urlOffset = 0;
-  }
-  return new Promise((fulfill, reject) => {
-    const url = `https://api.spotify.com/v1/me/playlists?limit=50&offset=${urlOffset}`;
+function getNextBatch(link, accessToken) {
+  return new Promise((resolve, reject) => {
+    fetch(link, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }).then(response => response.json())
+      .then(responseJSON => {
+        if (responseJSON.next){
+          getNextBatch(responseJSON.next, accessToken).then((nextTracks) => {
+            var tracks = responseJSON.items;
+            tracks = tracks.concat(nextTracks.items);
+            const toReturn = responseJSON;
+            toReturn.items = tracks;
+            resolve(toReturn);
+          });
+        }
+        else {
+          resolve(responseJSON);
+        }
+      });
+  });
+}
+
+export default function getPlaylists(accessToken) {
+  return new Promise((resolve, reject) => {
+    const url = 'https://api.spotify.com/v1/me/playlists?limit=50';
     fetch(url, {
       method: 'GET',
       headers: {
@@ -14,22 +35,18 @@ export default function getPlaylists(accessToken, offset) {
       },
     })
       .then(response => response.json())
-      .then((JSON) => {
-        if (JSON.total > 50 && !offset) {
-          var current = 50;
-          const otherPlaylists = [];
-          while (current < JSON.total) {
-            otherPlaylists.push(getPlaylists(accessToken, current));
-            current += 50;
-          }
-          Promise.all(otherPlaylists).then((playlists) => {
-            let jsonList = JSON.items;
-            playlists.forEach((playlist) => {
-              jsonList = jsonList.concat(playlist);
-            });
-            fulfill(jsonList);
+      .then((responseJSON) => {
+        if (responseJSON.next) {
+          getNextBatch(responseJSON.next, accessToken).then((nextTracks) => {
+            let tracks = responseJSON.items;
+            tracks = tracks.concat(nextTracks.items);
+            const toReturn = responseJSON;
+            toReturn.items = tracks;
+            resolve(toReturn.items);
           });
-        } else { fulfill(JSON.items); }
+        } else {
+          resolve(responseJSON.items);
+        }
       });
   });
 }
