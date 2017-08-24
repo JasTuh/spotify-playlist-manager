@@ -1,13 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
+import Page from '../layouts/main';
+import Login from '../components/login';
 
-export default class Index extends Component {
-  render() {
-    return (
-      <div>
-        hello world!
-        <br />
-        <a href="/login"> Login! </a>
-      </div>
-    ); 
-  }
-}
+export default () => (
+  <Page>
+    <Login />
+  </Page>
+);
