@@ -6,6 +6,7 @@ const mysql = require('mysql');
 const querystring = require('querystring');
 const keys = require('./keys.json');
 const request = require('request');
+const cookieParser = require('cookie-parser');
 
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
@@ -61,16 +62,28 @@ function handleLogin(req, res) {
   request.post(authOptions, (error, response, data) => {
     const accessToken = data.access_token;
     const refreshToken = data.refresh_token;
+    res.cookie('user', accessToken);
     res.redirect(`/userLoggedIn?${querystring.stringify({ accessToken, refreshToken })}`);
   });
 }
 
+function checkForCookies(req, res) {
+  console.log(req.cookies);
+  const user = req.cookies.user;
+  if (user) {
+    res.redirect(`/userLoggedIn?${querystring.stringify({ accessToken: user })}`);
+  } else {
+    handle(req, res);
+  }
+}
 co(function* () {
   yield app.prepare();
   const server = express();
+  server.use(cookieParser());
   server.use(body.json());
   server.get('/login', login);
   server.get('/handleLogin', handleLogin);
+  server.get('/', checkForCookies);
   server.get('*', (req, res) => handle(req, res));
   server.listen(PORT);
   console.log(`Listening on ${PORT}`);
