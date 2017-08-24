@@ -3,7 +3,9 @@ import React from 'react';
 export default function Login() {
   return (
     <div>
-      <button className="btn loginButton" href="/login"> Login! </button>
+      <form action="/login">
+        <button className="welcomeLoginButton btn-lg" action="/login"> Login! </button>
+      </form>
     </div>
   );
 }
